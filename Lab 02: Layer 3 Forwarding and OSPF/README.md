@@ -35,3 +35,18 @@ Screenshots and verification results will be added here.
 **Course:** CCNP Enterprise  
 **Lab:** 02  
 **Topic:** Layer 3 Forwarding and OSPF
+
+
+## Verification and Testing
+
+The following Cisco IOS commands were used to verify the network:
+
+- `show ip interface brief` – Verify interface status and IP addressing.
+- `show ip route` – Examine the routing table.
+- `show ip ospf neighbor` – Verify OSPF neighbor relationships.
+- `traceroute <destination>` – Examine packet forwarding paths.
+- `show ip route <destination>` – Identify the selected route and next hop.
+
+## Evidence
+
+Screenshots of the verification commands and their outputs are included in this lab.
