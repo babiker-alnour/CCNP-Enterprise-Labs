@@ -47,6 +47,27 @@ ip route 192.168.34.0 255.255.255.0 FastEthernet1/0
 These configurations were used to investigate how the router resolves the next hop, performs ARP resolution, and forwards packets toward destination networks.
 .
 
+### Ping Tests and ARP Behavior
+
+Connectivity tests were performed from R1 to different destinations to observe how ARP operates during packet forwarding.
+
+#### Ping R2 F1/0
+
+A ping was performed from R1 to the IP address of R2's FastEthernet1/0 interface.
+
+This test was used to observe ARP resolution for a directly reachable neighbor and identify ARP messages generated during connectivity testing.
+
+#### Ping R3 F1/0
+
+A ping was performed from R1 to R3's FastEthernet1/0 interface.
+
+The test demonstrates the difference between ARP resolution for the destination host and ARP resolution for the next-hop router when the destination belongs to a remote network.
+
+#### Ping R4 F1/1
+
+A ping was performed from R1 to R4's FastEthernet1/1 interface. The initial connectivity test was unsuccessful, requiring investigation of the routing and ARP behavior.
+
+This test highlights the importance of correct routing and next-hop resolution when reaching remote destinations.
 
 ## Screenshots
 
