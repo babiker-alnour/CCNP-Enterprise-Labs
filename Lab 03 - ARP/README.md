@@ -26,6 +26,13 @@ The lab focuses on ARP resolution, recursive static routes, directly connected s
 
 Documentation will be added after completing the lab.
 
+
+## Screenshots
+
+### ARP Debugging
+
+![ARP Debug](Screenshots/01-arp-debug.png)
+
 ## Wireshark Analysis
 
 Packet capture analysis will be added after completing the lab.
