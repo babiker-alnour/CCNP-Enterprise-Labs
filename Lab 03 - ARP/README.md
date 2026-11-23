@@ -20,7 +20,7 @@ The lab focuses on ARP resolution, recursive static routes, directly connected s
 
 ## Lab Topology
 
-Topology diagram will be added.
+![ARP and Static Routing Topology](arp-topology.png)
 
 ## Lab Configuration and Results
 
