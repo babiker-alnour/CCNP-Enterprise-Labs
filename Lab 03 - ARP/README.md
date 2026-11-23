@@ -93,6 +93,23 @@ This experiment demonstrates how ARP cache aging affects address resolution and 
 
 
 ## Screenshots
+### Wireshark Packet Analysis
+
+Wireshark was used to capture and analyze ARP traffic on the link between R1 and R2.
+
+The packet capture was examined to identify the following ARP operations:
+
+1. **ARP Request:** A device broadcasts a request to discover the MAC address associated with an IPv4 address.
+2. **ARP Reply:** The device owning the requested IP address responds with its MAC address.
+3. **ARP Cache:** After successful resolution, the IP-to-MAC mapping can be stored in the ARP table.
+4. **ARP Aging:** ARP entries eventually expire, requiring address resolution again when needed.
+
+The packet capture helped demonstrate how ARP operates at Layer 2 and supports IPv4 communication over Ethernet.
+
+#### Wireshark Screenshot
+
+![ARP Packet Analysis](Screenshots/02-wireshark-arp.png)
+
 
 ### ARP Debugging
 
