@@ -24,7 +24,28 @@ The lab focuses on ARP resolution, recursive static routes, directly connected s
 
 ## Lab Configuration and Results
 
-Documentation will be added after completing the lab.
+### Static Routing Configuration
+
+Two static routes were configured on R1 to compare recursive routing with directly connected static routing.
+
+**Recursive Static Route**
+
+A next-hop IP address was specified. The router must perform a recursive lookup to determine the outgoing interface.
+
+```cisco
+ip route 192.168.23.0 255.255.255.0 192.168.12.2
+```
+
+**Directly Connected Static Route**
+
+The outgoing interface was specified directly in the static route.
+
+```cisco
+ip route 192.168.34.0 255.255.255.0 FastEthernet1/0
+```
+
+These configurations were used to investigate how the router resolves the next hop, performs ARP resolution, and forwards packets toward destination networks.
+.
 
 
 ## Screenshots
