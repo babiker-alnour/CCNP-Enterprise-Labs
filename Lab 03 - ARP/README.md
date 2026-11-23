@@ -69,6 +69,29 @@ A ping was performed from R1 to R4's FastEthernet1/1 interface. The initial conn
 
 This test highlights the importance of correct routing and next-hop resolution when reaching remote destinations.
 
+### ARP Table and Aging
+
+The ARP table was examined on R1 to identify the mappings between IPv4 addresses and MAC addresses.
+
+```cisco
+show ip arp
+```
+
+The ARP table allows the router to associate IP addresses with Layer 2 addresses, enabling Ethernet frame delivery to the appropriate next-hop device.
+
+#### ARP Timeout Experiment
+
+The ARP timeout on R1's FastEthernet1/0 interface was changed to three minutes.
+
+```cisco
+arp timeout 180
+```
+
+The ARP entry for R2 was monitored to observe when it expired and when ARP resolution occurred again.
+
+This experiment demonstrates how ARP cache aging affects address resolution and the generation of ARP traffic.
+
+
 ## Screenshots
 
 ### ARP Debugging
