@@ -1,11 +1,10 @@
-
 # Lab 03: ARP and Static Routing
 
 ## Overview
 
-This lab explores ARP behavior and its relationship with static routing in Cisco routers.
+This lab explores Address Resolution Protocol (ARP) behavior and its relationship with static routing in Cisco routers.
 
-The lab focuses on ARP resolution, recursive static routes, directly connected static routes, and packet analysis using Wireshark.
+The lab focuses on ARP resolution, recursive static routes, directly connected static routes, connectivity troubleshooting, and packet analysis using Wireshark.
 
 ## Objectives
 
@@ -30,7 +29,7 @@ Two static routes were configured on R1 to compare recursive routing with direct
 
 **Recursive Static Route**
 
-A next-hop IP address was specified. The router must perform a recursive lookup to determine the outgoing interface.
+A next-hop IP address was specified. The router performs a recursive lookup to determine the outgoing interface.
 
 ```cisco
 ip route 192.168.23.0 255.255.255.0 192.168.12.2
@@ -45,7 +44,6 @@ ip route 192.168.34.0 255.255.255.0 FastEthernet1/0
 ```
 
 These configurations were used to investigate how the router resolves the next hop, performs ARP resolution, and forwards packets toward destination networks.
-.
 
 ### Ping Tests and ARP Behavior
 
@@ -55,17 +53,19 @@ Connectivity tests were performed from R1 to different destinations to observe h
 
 A ping was performed from R1 to the IP address of R2's FastEthernet1/0 interface.
 
-This test was used to observe ARP resolution for a directly reachable neighbor and identify ARP messages generated during connectivity testing.
+This test was used to observe ARP resolution for a directly connected neighbor.
 
 #### Ping R3 F1/0
 
 A ping was performed from R1 to R3's FastEthernet1/0 interface.
 
-The test demonstrates the difference between ARP resolution for the destination host and ARP resolution for the next-hop router when the destination belongs to a remote network.
+This test demonstrates how a router uses the next-hop router's MAC address when forwarding packets toward a remote network, rather than resolving the remote destination's MAC address directly.
 
 #### Ping R4 F1/1
 
-A ping was performed from R1 to R4's FastEthernet1/1 interface. The initial connectivity test was unsuccessful, requiring investigation of the routing and ARP behavior.
+A ping was performed from R1 to R4's FastEthernet1/1 interface.
+
+The initial connectivity test was unsuccessful, requiring investigation of the routing configuration and ARP behavior.
 
 This test highlights the importance of correct routing and next-hop resolution when reaching remote destinations.
 
@@ -91,9 +91,7 @@ The ARP entry for R2 was monitored to observe when it expired and when ARP resol
 
 This experiment demonstrates how ARP cache aging affects address resolution and the generation of ARP traffic.
 
-
-## Screenshots
-### Wireshark Packet Analysis
+## Wireshark Analysis
 
 Wireshark was used to capture and analyze ARP traffic on the link between R1 and R2.
 
@@ -104,21 +102,33 @@ The packet capture was examined to identify the following ARP operations:
 3. **ARP Cache:** After successful resolution, the IP-to-MAC mapping can be stored in the ARP table.
 4. **ARP Aging:** ARP entries eventually expire, requiring address resolution again when needed.
 
-The packet capture helped demonstrate how ARP operates at Layer 2 and supports IPv4 communication over Ethernet.
+The packet capture helps demonstrate how ARP operates at Layer 2 and supports IPv4 communication over Ethernet.
 
-#### Wireshark Screenshot
-
-![ARP Packet Analysis](Screenshots/02-wireshark-arp.png)
-
+## Screenshots
 
 ### ARP Debugging
 
+The ARP debugging output was examined to monitor address resolution activity on the routers.
+
 ![ARP Debug](Screenshots/01-arp-debug.png)
 
-## Wireshark Analysis
+### Wireshark Packet Analysis
 
-Packet capture analysis will be added after completing the lab.
+The following screenshot shows the ARP packet capture between R1 and R2.
+
+![ARP Packet Analysis](Screenshots/02-wireshark-arp.png)
 
 ## Conclusion
 
-This lab demonstrates how ARP operates during IP forwarding and how routing decisions influence ARP resolution.
+This lab provided practical experience with Address Resolution Protocol (ARP) and static routing in a multi-router network environment.
+
+The main concepts demonstrated were:
+
+- How ARP requests and replies resolve IPv4 addresses to MAC addresses.
+- How routers use ARP to communicate with directly connected next-hop devices.
+- The difference between recursive and directly connected static routes.
+- How routing decisions affect packet forwarding and ARP resolution.
+- How ARP entries are maintained and refreshed through cache aging.
+- How Wireshark can be used to capture and analyze ARP traffic.
+
+The lab strengthened my understanding of the relationship between Layer 2 address resolution and Layer 3 packet forwarding.
