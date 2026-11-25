@@ -1,30 +1,29 @@
-
 # GRE Tunnel, MTU, Path MTU Discovery & IP Fragmentation
 
 ![CCNP Enterprise](https://img.shields.io/badge/Track-CCNP%20Enterprise-blue)
 ![Cisco IOS](https://img.shields.io/badge/Platform-Cisco%20IOS-red)
 ![Topic](https://img.shields.io/badge/Topic-GRE%20%7C%20MTU%20%7C%20Fragmentation-green)
-![Status](https://img.shields.io/badge/Status-In%20Progress-orange)
+![Status](https://img.shields.io/badge/Status-Practical%20Lab%20Completed-brightgreen)
 
 ## 1. Project Overview
 
 This lab explores GRE tunneling, Maximum Transmission Unit (MTU), IP fragmentation, and the Don't Fragment (DF) bit using Cisco IOS routers.
 
-The objective is to understand how GRE encapsulation affects packet size, investigate fragmentation behavior, and troubleshoot MTU-related connectivity problems.
+The objective is to understand how GRE encapsulation affects packet size, investigate fragmentation behavior, and analyze MTU-related packet delivery.
 
-This is a practical CCNP Enterprise lab focused on network configuration, packet analysis, and troubleshooting.
+This is a practical CCNP Enterprise lab focused on network configuration, verification, and troubleshooting.
 
 ## 2. Lab Objectives
 
+- Configure and verify a GRE tunnel.
 - Perform extended ping tests using different packet sizes.
 - Understand the DF bit and its effect on IP fragmentation.
-- Configure and verify a GRE tunnel.
-- Investigate the default GRE tunnel MTU.
+- Investigate the effective GRE tunnel MTU.
 - Modify the tunnel IP MTU to 1500 bytes.
 - Compare ping results with DF enabled and disabled.
-- Observe IP fragmentation.
-- Troubleshoot connectivity between R1 and R3.
-- Identify and resolve MTU-related problems.
+- Investigate end-to-end MTU behavior between R1 and R3.
+- Understand the relationship between underlay MTU and GRE encapsulation.
+- Review Path MTU Discovery configuration.
 
 ## 3. Network Topology
 
@@ -56,28 +55,16 @@ The GRE tunnel is established between R1 and R2.
 
 ### Objective
 
-Perform an extended ping from R1 to R2's physical WAN address.
+Perform an extended ping from R1 to R2's physical WAN address to investigate the packet-size limit.
 
-Configure:
+### Test parameters
+
+- Destination: `203.0.112.2`
 - DF bit: Enabled
 - Minimum packet size: 1496 bytes
 - Maximum packet size: 1505 bytes
 - Increment: 1 byte
 - Timeout: 1 second
-
-### Command
-
-```cisco
-R1# ping
-```
-
-Extended ping parameters were entered interactively.
-
-Destination:
-
-```text
-203.0.112.2
-```
 
 ### Actual results
 
@@ -96,25 +83,23 @@ Destination:
 
 **Test summary:**
 
-- Successful packets: 5/10
-- Failed packets: 5/10
-- Maximum successful packet size: 1500 bytes.
+- Successful tests: 5/10
+- Failed tests: 5/10
+- Maximum successful tested packet size: 1500 bytes
 
 ### Technical analysis
 
-The physical underlay interfaces operate with a 1500-byte MTU.
+The test demonstrates that packets up to 1500 bytes succeeded, while larger tested packets failed with DF enabled.
 
-When the DF bit is enabled, routers cannot fragment an oversized IPv4 packet.
+When the DF bit is enabled, an IPv4 router cannot fragment the packet to accommodate a smaller outgoing MTU.
 
-Therefore, packets exceeding the outgoing interface MTU cannot be forwarded without fragmentation.
-
-The test demonstrates the packet-size limitation of the physical underlay path.
+The observed result is consistent with a 1500-byte underlay MTU limitation.
 
 ## 5. Exercise 2 – GRE Tunnel Configuration and MTU Verification
 
 ### Objective
 
-Verify the existing GRE tunnel between R1 and R2 and investigate its MTU.
+Verify the GRE tunnel between R1 and R2 and investigate its effective MTU.
 
 ### GRE configuration
 
@@ -123,8 +108,10 @@ Verify the existing GRE tunnel between R1 and R2 and investigate its MTU.
 ```cisco
 interface Tunnel0
  ip address 192.168.12.1 255.255.255.252
- tunnel source 203.0.111.1
+ ip mtu 1476
+ tunnel source FastEthernet0/0
  tunnel destination 203.0.112.2
+ tunnel path-mtu-discovery
 ```
 
 **R2:**
@@ -132,6 +119,7 @@ interface Tunnel0
 ```cisco
 interface Tunnel0
  ip address 192.168.12.2 255.255.255.252
+ ip mtu 1476
  tunnel source 203.0.112.2
  tunnel destination 203.0.111.1
 ```
@@ -143,44 +131,36 @@ show interfaces tunnel0
 show ip interface tunnel0
 ```
 
-### Actual R1 results
+### Actual results
 
-From `show interfaces tunnel0`:
+Both routers reported the following from `show interfaces tunnel0`:
 
 ```text
 MTU 17916 bytes
 Tunnel transport MTU 1476 bytes
 ```
 
-From `show ip interface tunnel0`:
+Both routers reported the following effective IP MTU using `show ip interface tunnel0`:
 
 ```text
 MTU is 1476 bytes
 ```
 
-### Actual R2 results
-
-From `show interfaces tunnel0`:
-
-```text
-MTU 17916 bytes
-Tunnel transport MTU 1476 bytes
-```
-
 ### MTU analysis
 
-The GRE tunnel uses additional headers when encapsulating packets.
+A standard GRE tunnel over IPv4 adds:
 
-For a standard IPv4 GRE tunnel:
-
-- Underlay MTU: 1500 bytes
 - Outer IPv4 header: 20 bytes
 - GRE header: 4 bytes
 
 Calculation:
 
 ```text
-1500 - 20 - 4 = 1476 bytes
+Underlay MTU:       1500 bytes
+Outer IPv4 header:    20 bytes
+GRE header:            4 bytes
+--------------------------------
+Effective tunnel MTU: 1476 bytes
 ```
 
 The effective tunnel IP MTU is therefore 1476 bytes.
@@ -193,18 +173,9 @@ The logical interface MTU reported by `show interfaces tunnel0` is 17916 bytes i
 
 ### Objective
 
-Configure both GRE tunnel interfaces with an IP MTU of 1500 bytes and investigate the effect on packet fragmentation.
+Configure both GRE tunnel interfaces with an IP MTU of 1500 bytes and compare packet delivery with the DF bit enabled and disabled.
 
-### Configuration on R1
-
-```cisco
-configure terminal
-interface Tunnel0
- ip mtu 1500
-end
-```
-
-### Configuration on R2
+### Configuration on R1 and R2
 
 ```cisco
 configure terminal
@@ -213,7 +184,7 @@ interface Tunnel0
 end
 ```
 
-### Router warning
+### Router warnings
 
 Both routers generated the following warning:
 
@@ -239,146 +210,99 @@ Command:
 show ip interface tunnel0
 ```
 
-R1:
+Both routers confirmed:
 
 ```text
 MTU is 1500 bytes
 ```
 
-R2:
+### Actual ping tests
 
-```text
-MTU is 1500 bytes
-```
+**Test 1 – DF disabled**
 
-**Analysis:**
+| Parameter | Value |
+|---|---|
+| Source | R1 |
+| Destination | 192.168.12.2 |
+| Datagram size | 1500 bytes |
+| DF bit | Disabled |
+| Result | Success (1/1) |
+| RTT | 72 ms |
 
-The configured tunnel IP MTU is now larger than the tunnel transport MTU.
+**Test 2 – DF enabled**
 
-This creates a potential fragmentation condition when packets are encapsulated and transmitted over the physical underlay.
-Exercise 3 – GRE MTU and DF-bit testing
+| Parameter | Value |
+|---|---|
+| Source | R1 |
+| Destination | 192.168.12.2 |
+| Datagram size | 1500 bytes |
+| DF bit | Enabled |
+| Result | Failure (0/1) |
 
-Configured IP MTU: 1500 bytes
-Tunnel transport MTU: 1476 bytes
+### Analysis
 
-Test 1:
-Datagram size: 1500 bytes
-DF bit: Disabled
-Result: Success (1/1)
-RTT: 72 ms
+The 1500-byte ping succeeded when fragmentation was permitted but failed when DF was enabled.
 
-Test 2:
-Datagram size: 1500 bytes
-DF bit: Enabled
-Result: Failure (0/1)
+This behavior is consistent with the packet exceeding the GRE tunnel's 1476-byte transport MTU.
 
-Conclusion:
-The 1500-byte packet passed when fragmentation was permitted,
-but failed when the DF bit prohibited fragmentation.
+The ping results alone do not confirm the actual number of fragments. A packet capture would be required to inspect fragment offsets and IPv4 flags.
 
-### Test 1 – 1500-byte ping without DF
+### Restore the effective tunnel MTU
 
-Source: R1
-
-Destination: R2 Tunnel0 (192.168.12.2)
-
-Packet size: 1500 bytes
-
-DF bit: Disabled
-
-**Result:** Pending practical verification.
-
-### Test 2 – 1500-byte ping with DF
-
-Source: R1
-
-Destination: R2 Tunnel0 (192.168.12.2)
-
-Packet size: 1500 bytes
-
-DF bit: Enabled
-
-**Result:** Pending practical verification.
-
-### Fragmentation analysis
-
-The purpose of these tests is to compare how the routers handle oversized GRE-encapsulated packets when fragmentation is permitted versus when the DF bit prevents fragmentation.
-
-Packet captures can be used to inspect:
-
-- Outer IPv4 packet size.
-- Fragment offsets.
-- More Fragments (MF) flag.
-- Don't Fragment (DF) flag.
-- Number of fragments.
-
-### Restore default tunnel MTU
-
-After completing both tests, restore the default configuration on R1 and R2:
+After the tests, both R1 and R2 were restored to an IP MTU of 1476 bytes:
 
 ```cisco
 configure terminal
 interface Tunnel0
- no ip mtu
+ ip mtu 1476
 end
 ```
 
-Verify:
+Verification:
 
 ```cisco
 show ip interface tunnel0
 ```
 
-Expected effective IP MTU:
+Expected and observed effective IP MTU:
 
 ```text
 MTU is 1476 bytes
 ```
 
-## 7. Exercise 4 – Troubleshooting R1 to R3
+## 7. Exercise 4 – End-to-End GRE MTU Testing
 
 ### Objective
 
-Investigate packet delivery between R1 and R3 using different DF-bit settings.
+Investigate packet delivery from R1 to R3 using different packet sizes and DF-bit settings.
 
-### Initial tests
+### Test parameters
 
-**Test 1:**
+- Source: `192.168.12.1`
+- Destination: `192.168.23.3`
 
-```text
-Source: R1
-Destination: R3 (192.168.23.3)
-Packet size: 1476 bytes
-DF bit: Enabled
-```
+### Actual results
 
-**Test 2:**
+| Datagram size | DF bit | Result |
+|---:|---|---|
+| 1496 bytes | Enabled | Failure (0/1) |
+| 1476 bytes | Enabled | Success (1/1) |
+| 1477 bytes | Enabled | Failure (0/1) |
+| 1477 bytes | Disabled | Success (1/1) |
 
-```text
-Source: R1
-Destination: R3 (192.168.23.3)
-Packet size: 1476 bytes
-DF bit: Disabled
-```
+### Analysis
 
-Exercise 4 – End-to-End GRE MTU Testing
+The maximum successful tested datagram size with DF enabled was 1476 bytes.
 
-Source: 192.168.12.1
-Destination: 192.168.23.3
-DF bit: Enabled
+The 1477-byte packet failed when fragmentation was prohibited but succeeded when DF was disabled.
 
-1476 bytes: Success (1/1)
-1477 bytes: Failure (0/1)
-1496 bytes: Failure (0/1)
+These results are consistent with the effective tunnel IP MTU of 1476 bytes.
 
-Conclusion:
-The maximum successful datagram size observed was 1476 bytes.
-Packets exceeding the tunnel IP MTU failed when fragmentation
-was prohibited.
+The test illustrates why packet size and DF-bit behavior must be considered when troubleshooting GRE tunnel connectivity.
 
 ### Troubleshooting methodology
 
-The following commands will be used:
+The following IOS commands are useful when investigating MTU-related issues:
 
 ```cisco
 show ip route
@@ -389,46 +313,53 @@ show ip traffic
 traceroute 192.168.23.3
 ```
 
-Troubleshooting process:
+The troubleshooting process included:
 
 1. Verify normal connectivity.
-2. Check routing tables on R1, R2, and R3.
+2. Check routing tables.
 3. Verify GRE tunnel status.
 4. Check physical interface MTUs.
 5. Check tunnel IP MTU.
-6. Investigate DF-bit behavior.
-7. Inspect fragmentation.
-8. Identify the root cause.
-9. Implement the solution.
-10. Repeat the original tests.
+6. Compare packet delivery with DF enabled and disabled.
+7. Restore the intended tunnel MTU.
+8. Repeat the verification tests.
 
-### Root cause
+### Findings
 
-Pending practical investigation.
+The tests did not reveal a general routing failure. Normal connectivity was successful before the MTU experiments.
 
-### Solution
+The observed failures occurred with packet sizes exceeding the effective 1476-byte tunnel IP MTU when DF was enabled.
 
-Pending practical investigation.
+### Final tunnel verification
 
-### Final verification
+Both R1 and R2 were verified with:
 
-| Test | Before fix | After fix |
-|---|---|---|
-| R1 to R3, 1476 bytes, DF enabled | Pending | Pending |
-| R1 to R3, 1476 bytes, DF disabled | Pending | Pending |
-| Normal connectivity | Successful | Pending |
+- Tunnel interface status: up/up
+- Effective tunnel IP MTU: 1476 bytes
+- Tunnel transport MTU: 1476 bytes
+- Logical interface MTU: 17916 bytes
+
+Both tunnel interfaces reported zero input errors, output errors, and output drops at the time of final verification.
+
+R1 also had Path MTU Discovery configured:
+
+```cisco
+tunnel path-mtu-discovery
+```
+
+The command was not present in the R2 configuration during this lab.
 
 ## 8. Baseline Connectivity Verification
 
-Before changing the MTU configuration, connectivity was verified from R1.
+Before the MTU experiments, connectivity was verified from R1.
 
 | Destination | Purpose | Result |
 |---|---|---|
-| 203.0.112.2 | Physical connectivity to R2 | 100% success |
-| 192.168.12.2 | GRE tunnel connectivity | 100% success |
-| 192.168.23.3 | Remote network connectivity | 100% success |
+| 203.0.112.2 | Physical connectivity to R2 | 5/5 successful |
+| 192.168.12.2 | GRE tunnel connectivity | 5/5 successful |
+| 192.168.23.3 | Remote network connectivity | 5/5 successful |
 
-The initial GRE tunnel was operational before the MTU experiments.
+The initial GRE tunnel and end-to-end connectivity were operational before the MTU experiments.
 
 ## 9. Technical Concepts Learned
 
@@ -438,10 +369,10 @@ This lab demonstrates practical knowledge of:
 - IPv4 packet structure.
 - Maximum Transmission Unit (MTU).
 - Tunnel IP MTU.
-- Transport MTU.
+- Tunnel transport MTU.
 - DF-bit behavior.
 - IP fragmentation and reassembly.
-- Path MTU Discovery.
+- Path MTU Discovery configuration.
 - Static routing.
 - ICMP troubleshooting.
 - Cisco IOS verification commands.
@@ -455,11 +386,12 @@ This lab demonstrates practical knowledge of:
 - Switch: SW1
 - Tunnel technology: GRE over IPv4
 - Underlay MTU: 1500 bytes
+- Effective GRE tunnel IP MTU: 1476 bytes
 
 ## 11. Repository Structure
 
 ```text
-ccnp-enterprise-gre-mtu-fragmentation/
+Lab 04 - GRE Tunnel, MTU, Path MTU Discovery & IP Fragmentation/
 │
 ├── README.md
 │
@@ -472,27 +404,27 @@ ccnp-enterprise-gre-mtu-fragmentation/
 │   ├── R2.txt
 │   └── R3.txt
 │
-├── screenshots/
-│   ├── 01-topology.png
-│   ├── 02-extended-ping.png
-│   ├── 03-gre-mtu-default.png
-│   ├── 04-mtu-1500-warning.png
-│   ├── 05-fragmentation-test.png
-│   ├── 06-df-bit-test.png
-│   ├── 07-troubleshooting.png
-│   └── 08-final-verification.png
-│
-└── notes/
-    └── troubleshooting.md
+└── screenshots/
+    ├── 01-R1-gre-tunnel-up.png
+    ├── 01-R2-gre-tunnel-up.png
+    ├── 02-underlay-mtu.png
+    ├── 03-R1-gre-default-mtu.png
+    ├── 03-R2-gre-default-mtu.png
+    ├── 04-R1-gre-mtu-1500.png
+    └── 05-R1-end-to-end-mtu.png
 ```
 
 ## 12. Conclusion
 
-This lab investigates the relationship between GRE encapsulation, MTU limitations, and IPv4 fragmentation.
+This lab investigated the relationship between GRE encapsulation, MTU limitations, and IPv4 fragmentation.
 
-The experiments demonstrate why tunnel MTU configuration must consider the physical underlay MTU and the additional headers introduced by GRE.
+The experiments demonstrated that a standard GRE tunnel over a 1500-byte IPv4 underlay has an effective tunnel IP MTU of 1476 bytes.
 
-The final objective is to identify and resolve the connectivity problem between R1 and R3 through practical troubleshooting and packet analysis.
+The ping tests showed how packet delivery changes when the DF bit is enabled or disabled and when the configured tunnel MTU exceeds the transport MTU.
+
+The lab also reinforced the importance of verifying tunnel interfaces, checking packet sizes, and using systematic troubleshooting methods.
+
+**Note:** Actual IP fragmentation was not independently verified with packet captures in this lab. Packet capture analysis remains a useful next step for observing the outer IPv4 fragments directly.
 
 ---
 
