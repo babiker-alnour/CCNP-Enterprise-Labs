@@ -256,6 +256,25 @@ MTU is 1500 bytes
 The configured tunnel IP MTU is now larger than the tunnel transport MTU.
 
 This creates a potential fragmentation condition when packets are encapsulated and transmitted over the physical underlay.
+Exercise 3 – GRE MTU and DF-bit testing
+
+Configured IP MTU: 1500 bytes
+Tunnel transport MTU: 1476 bytes
+
+Test 1:
+Datagram size: 1500 bytes
+DF bit: Disabled
+Result: Success (1/1)
+RTT: 72 ms
+
+Test 2:
+Datagram size: 1500 bytes
+DF bit: Enabled
+Result: Failure (0/1)
+
+Conclusion:
+The 1500-byte packet passed when fragmentation was permitted,
+but failed when the DF bit prohibited fragmentation.
 
 ### Test 1 – 1500-byte ping without DF
 
