@@ -361,6 +361,21 @@ Packet size: 1476 bytes
 DF bit: Disabled
 ```
 
+Exercise 4 – End-to-End GRE MTU Testing
+
+Source: 192.168.12.1
+Destination: 192.168.23.3
+DF bit: Enabled
+
+1476 bytes: Success (1/1)
+1477 bytes: Failure (0/1)
+1496 bytes: Failure (0/1)
+
+Conclusion:
+The maximum successful datagram size observed was 1476 bytes.
+Packets exceeding the tunnel IP MTU failed when fragmentation
+was prohibited.
+
 ### Troubleshooting methodology
 
 The following commands will be used:
