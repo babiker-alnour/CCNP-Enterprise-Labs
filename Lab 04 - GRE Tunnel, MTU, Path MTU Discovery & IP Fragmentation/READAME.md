@@ -155,16 +155,6 @@ The effective tunnel IP MTU was 1476 bytes, matching the calculated value.
 
 The 17916-byte value displayed by `show interfaces Tunnel0` represents the logical interface MTU reported by IOS. It should not be confused with the effective IP MTU shown by `show ip interface Tunnel0`.
 
-### Tunnel Verification Screenshots
-
-**R1 – GRE Tunnel Up**
-
-![R1 GRE Tunnel Up](screenshots/01-R1-gre-tunnel-up.png)
-
-**R2 – GRE Tunnel Up**
-
-![R2 – GRE Tunnel Up](screenshots/01-R2-gre-tunnel-up.png)
-
 ## 9. Exercise 3 – Configuring Tunnel IP MTU to 1500
 
 The next experiment tested what happens when the GRE tunnel IP MTU is configured to 1500 bytes, even though the tunnel transport MTU is 1476 bytes.
@@ -329,17 +319,8 @@ Lab 04 - GRE Tunnel, MTU, Path MTU Discovery & IP Fragmentation/
 │
 ├── README.md
 │
-├── topology/
-│   └── topology.png
-│
-└── screenshots/
-    ├── 01-R1-gre-tunnel-up.png
-    ├── 01-R2-gre-tunnel-up.png
-    ├── 02-underlay-mtu.png
-    ├── 03-R1-gre-default-mtu.png
-    ├── 03-R2-gre-default-mtu.png
-    ├── 04-R1-gre-mtu-1500.png
-    └── 05-R1-end-to-end-mtu.png
+└── topology/
+    └── topology.png
 ```
 
 ---
